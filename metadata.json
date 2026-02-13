@@ -1,0 +1,7 @@
+{
+  "name": "ECHO - The Meaning Network",
+  "description": "A high-fidelity landing page for ECHO, a multi-generational mutual aid network in Taiwan focusing on family, workplace, and neighborhood connections through a voice-based gratitude system.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
