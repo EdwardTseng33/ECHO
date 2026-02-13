@@ -11,7 +11,9 @@ const roleData: Record<UserRole, { label: string, icon: string }> = {
   other: { label: '其他', icon: '✨' }
 };
 
-// 用於背景的裝飾性節點位置
+// --- 已填入您的 Google Apps Script 網址 ---
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzE_gGxX6UB_58y_6Zboa-AO_xjs9nZXcxsGrlj3x4b94QbZucsbe2LoopOVVcuwAF2eQ/exec";
+
 const DECORATIVE_NODES = [
   { top: '15%', left: '10%', size: 4, delay: '0s' },
   { top: '25%', left: '85%', size: 6, delay: '1.2s' },
@@ -36,18 +38,13 @@ export const Hero: React.FC = () => {
     const { left, top, width, height } = heroRef.current.getBoundingClientRect();
     const x = e.clientX - left;
     const y = e.clientY - top;
-    
-    // 計算視差偏移
     const px = (x - width / 2) / 40;
     const py = (y - height / 2) / 40;
     setMousePos({ x: px, y: py });
 
-    // 產生互動波紋 (每移動一段距離產生一個)
     if (Math.random() > 0.85) {
       const newRipple = { id: rippleIdRef.current++, x, y };
       setRipples(prev => [...prev.slice(-10), newRipple]);
-      
-      // 自動清除波紋
       setTimeout(() => {
         setRipples(prev => prev.filter(r => r.id !== newRipple.id));
       }, 2000);
@@ -61,20 +58,29 @@ export const Hero: React.FC = () => {
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
+    
     if (!role) { setStatus('invalid'); setErrorMessage('請先選擇您的身分'); return; }
-    if (!validateEmail(email)) { setStatus('invalid'); setErrorMessage('輸入資訊有誤，請檢查 Email 格式'); return; }
+    if (!validateEmail(email)) { setStatus('invalid'); setErrorMessage('Email 格式不正確'); return; }
     
     setStatus('submitting');
     try {
-      const response = await fetch("https://formspree.io/f/mqaeapzo", {
+      // 使用 no-cors 模式確保請求發送成功
+      await fetch(GOOGLE_SCRIPT_URL, {
         method: "POST",
+        mode: "no-cors", 
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, user_profile: roleData[role].label, _subject: `【ECHO 封測預約】來自 ${roleData[role].label}` }),
+        body: JSON.stringify({ 
+          timestamp: new Date().toLocaleString(),
+          email: email, 
+          role: roleData[role].label,
+          type: "預約封測"
+        }),
       });
-      if (response.ok) setStatus('success');
-      else { setStatus('error'); setErrorMessage('伺服器忙碌中，請稍後再試'); }
+      setStatus('success');
     } catch (error) {
-      setStatus('error'); setErrorMessage('網路連線異常，請檢查您的網路');
+      console.error("Submission error:", error);
+      setStatus('error'); 
+      setErrorMessage('連線異常，請檢查網路或稍後再試');
     }
   };
 
@@ -89,53 +95,16 @@ export const Hero: React.FC = () => {
       onMouseMove={handleMouseMove}
       className="pt-48 pb-32 px-6 relative overflow-hidden flex flex-col items-center min-h-[90vh]"
     >
-      {/* 背景互動層 */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-        {/* 滑動產生的波紋 */}
         {ripples.map(ripple => (
-          <div 
-            key={ripple.id}
-            className="absolute border border-purple-400/30 rounded-full animate-ripple-out"
-            style={{ 
-              left: ripple.x, 
-              top: ripple.y,
-              width: '10px',
-              height: '10px',
-              transform: 'translate(-50%, -50%)'
-            }}
-          />
+          <div key={ripple.id} className="absolute border border-purple-400/30 rounded-full animate-ripple-out" style={{ left: ripple.x, top: ripple.y, width: '10px', height: '10px', transform: 'translate(-50%, -50%)' }} />
         ))}
-
-        {/* 核心價值節點：象徵社群成員 */}
         {DECORATIVE_NODES.map((node, i) => (
-          <div 
-            key={i}
-            className="absolute bg-purple-400/40 rounded-full blur-[1px] animate-pulse"
-            style={{ 
-              top: node.top, 
-              left: node.left,
-              width: `${node.size}px`,
-              height: `${node.size}px`,
-              animationDelay: node.delay,
-              transform: `translate(${mousePos.x * (i % 2 === 0 ? 1.2 : -1.2)}px, ${mousePos.y * (i % 2 === 0 ? 1.2 : -1.2)}px)`,
-              transition: 'transform 0.8s cubic-bezier(0.2, 0, 0.2, 1)'
-            }}
-          />
+          <div key={i} className="absolute bg-purple-400/40 rounded-full blur-[1px] animate-pulse" style={{ top: node.top, left: node.left, width: `${node.size}px`, height: `${node.size}px`, animationDelay: node.delay, transform: `translate(${mousePos.x * (i % 2 === 0 ? 1.2 : -1.2)}px, ${mousePos.y * (i % 2 === 0 ? 1.2 : -1.2)}px)`, transition: 'transform 0.8s cubic-bezier(0.2, 0, 0.2, 1)' }} />
         ))}
-
-        {/* 大型流體漸層球 */}
-        <div 
-          className="absolute top-[10%] left-[5%] w-[40rem] h-[40rem] bg-purple-300/20 rounded-full mix-blend-multiply filter blur-[100px] animate-blob"
-          style={{ transform: `translate(${mousePos.x * 2}px, ${mousePos.y * 2}px)` }}
-        ></div>
-        <div 
-          className="absolute bottom-[10%] right-[5%] w-[35rem] h-[35rem] bg-pink-300/20 rounded-full mix-blend-multiply filter blur-[100px] animate-blob animation-delay-2000"
-          style={{ transform: `translate(${mousePos.x * -2}px, ${mousePos.y * -2}px)` }}
-        ></div>
-        <div 
-          className="absolute top-[40%] right-[20%] w-[30rem] h-[30rem] bg-blue-300/10 rounded-full mix-blend-multiply filter blur-[100px] animate-blob animation-delay-4000"
-          style={{ transform: `translate(${mousePos.x}px, ${mousePos.y}px)` }}
-        ></div>
+        <div className="absolute top-[10%] left-[5%] w-[40rem] h-[40rem] bg-purple-300/20 rounded-full mix-blend-multiply filter blur-[100px] animate-blob" style={{ transform: `translate(${mousePos.x * 2}px, ${mousePos.y * 2}px)` }}></div>
+        <div className="absolute bottom-[10%] right-[5%] w-[35rem] h-[35rem] bg-pink-300/20 rounded-full mix-blend-multiply filter blur-[100px] animate-blob animation-delay-2000" style={{ transform: `translate(${mousePos.x * -2}px, ${mousePos.y * -2}px)` }}></div>
+        <div className="absolute top-[40%] right-[20%] w-[30rem] h-[30rem] bg-blue-300/10 rounded-full mix-blend-multiply filter blur-[100px] animate-blob animation-delay-4000" style={{ transform: `translate(${mousePos.x}px, ${mousePos.y}px)` }}></div>
       </div>
 
       <div className="max-w-5xl mx-auto text-center relative z-10">
@@ -157,28 +126,18 @@ export const Hero: React.FC = () => {
           {status !== 'success' ? (
             <div className="w-full space-y-8">
               <div className="space-y-4">
-                <p className="text-xs font-black text-gray-400 uppercase tracking-widest">請先選擇您的身分，讓我們更了解您</p>
+                <p className="text-xs font-black text-gray-400 uppercase tracking-widest">請先選擇您的身分</p>
                 <div className="flex flex-wrap justify-center gap-2 md:gap-3">
                   {(Object.keys(roleData) as UserRole[]).map((key) => (
                     <button
                       key={key}
                       type="button"
-                      onClick={() => {
-                        setRole(key);
-                        if (status === 'invalid' && errorMessage.includes('身分')) {
-                          setStatus('idle');
-                          setErrorMessage('');
-                        }
-                      }}
+                      onClick={() => setRole(key)}
                       className={`px-4 md:px-5 py-2 md:py-2.5 rounded-2xl text-sm font-bold transition-all border-2 flex items-center gap-2 ${
-                        role === key 
-                          ? 'bg-purple-600 border-purple-600 text-white shadow-xl scale-105' 
-                          : 'bg-white/80 border-gray-100 text-gray-500 hover:border-purple-200 hover:bg-white shadow-sm'
+                        role === key ? 'bg-purple-600 border-purple-600 text-white shadow-xl scale-105' : 'bg-white/80 border-gray-100 text-gray-500 hover:border-purple-200 hover:bg-white shadow-sm'
                       }`}
                     >
-                      <span className={role === key ? "animate-bounce inline-block" : "inline-block"}>
-                        {roleData[key].icon}
-                      </span>
+                      <span>{roleData[key].icon}</span>
                       {roleData[key].label}
                     </button>
                   ))}
@@ -187,19 +146,12 @@ export const Hero: React.FC = () => {
 
               <div className="relative w-full group">
                 <form onSubmit={handleSubscribe} className={`w-full bg-white/90 backdrop-blur-sm p-2 md:p-2.5 rounded-full shadow-2xl border flex items-center transition-all duration-300 ${
-                  (status === 'invalid' || status === 'error') ? 'border-red-400 shadow-red-100 animate-shake' : 'border-gray-100 hover:border-purple-200 shadow-purple-900/5'
+                  (status === 'invalid' || status === 'error') ? 'border-red-400 animate-shake shadow-red-50' : 'border-gray-100 hover:border-purple-200 shadow-purple-900/5'
                 }`}>
                   <input 
-                    type="text" 
-                    name="email"
+                    type="email" 
                     value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value);
-                      if (status === 'invalid' || status === 'error') {
-                        setStatus('idle');
-                        setErrorMessage('');
-                      }
-                    }}
+                    onChange={(e) => setEmail(e.target.value)}
                     placeholder="輸入您的常用 Email" 
                     className="flex-1 px-5 md:px-8 py-3 md:py-4 rounded-full outline-none text-gray-800 bg-transparent text-sm md:text-base font-medium"
                     required 
@@ -212,13 +164,10 @@ export const Hero: React.FC = () => {
                       status === 'submitting' ? 'bg-gray-400' : 'bg-gray-900 text-white hover:bg-purple-700 active:scale-95'
                     }`}
                   >
-                    {status === 'submitting' ? (
-                      <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                    ) : '預約封測'}
+                    {status === 'submitting' ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span> : '預約封測'}
                   </button>
                 </form>
-                
-                {status === 'invalid' && errorMessage && (
+                {(status === 'invalid' || status === 'error') && errorMessage && (
                   <p className="absolute -bottom-8 left-6 text-red-500 text-xs font-bold animate-fade-in flex items-center gap-1">
                     <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                     {errorMessage}
@@ -232,46 +181,21 @@ export const Hero: React.FC = () => {
               <div className="space-y-3">
                 <p className="text-2xl md:text-3xl font-black text-gray-900">預約成功！</p>
                 <div className="space-y-1">
-                  <p className="text-base md:text-lg text-gray-600 font-medium">感謝您願意讓付出擁有回音。</p>
-                  <p className="text-sm text-gray-500">我們將於 2026 Q2 封測啟動時第一時間通知您。</p>
+                  <p className="text-base md:text-lg text-gray-600 font-medium italic">「讓每一次付出，都有溫暖的回響。」</p>
+                  <p className="text-sm text-gray-500">名單已即時同步至 Google Sheets，我們將於 2026 第一時間通知您。</p>
                 </div>
               </div>
-              <button 
-                onClick={() => setStatus('idle')}
-                className="text-xs font-bold text-gray-400 hover:text-purple-600 transition-colors uppercase tracking-widest"
-              >
-                返回修改資料
-              </button>
+              <button onClick={() => setStatus('idle')} className="text-xs font-bold text-gray-400 hover:text-purple-600 transition-colors uppercase tracking-widest">返回修改資料</button>
             </div>
           )}
-          
-          <div className="flex gap-4 items-center mt-6">
-            <button 
-              onClick={() => scrollTo('partners')}
-              className="text-xs md:text-sm text-purple-600 font-black hover:text-purple-800 cursor-pointer flex items-center gap-1.5 transition-colors group"
-            >
-              或是成為 ECHO 的合作夥伴 <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M14 5l7 7m0 0l-7 7m7-7H3" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            </button>
-          </div>
         </div>
       </div>
 
       <style>{`
-        @keyframes ripple-out {
-          0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
-          100% { transform: translate(-50%, -50%) scale(15); opacity: 0; }
-        }
-        .animate-ripple-out {
-          animation: ripple-out 1.5s cubic-bezier(0, 0, 0.2, 1) forwards;
-        }
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          25% { transform: translateX(-4px); }
-          75% { transform: translateX(4px); }
-        }
-        .animate-shake {
-          animation: shake 0.4s ease-in-out;
-        }
+        @keyframes ripple-out { 0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; } 100% { transform: translate(-50%, -50%) scale(15); opacity: 0; } }
+        .animate-ripple-out { animation: ripple-out 1.5s cubic-bezier(0, 0, 0.2, 1) forwards; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+        .animate-shake { animation: shake 0.4s ease-in-out; }
       `}</style>
     </header>
   );
