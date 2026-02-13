@@ -1,8 +1,21 @@
 
 import React from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export const Footer: React.FC = () => {
+  const { language } = useLanguage();
   const contactEmail = "edwardt0303@gmail.com";
+
+  const t = {
+    'zh-TW': {
+      contact: "聯絡",
+      madeWith: "Made with ❤️ in Taiwan."
+    },
+    'en-US': {
+      contact: "Contact",
+      madeWith: "Made with ❤️ in Taiwan."
+    }
+  }[language];
   
   return (
     <footer className="bg-gray-50 py-16 border-t border-gray-200">
@@ -19,7 +32,7 @@ export const Footer: React.FC = () => {
           </div>
           
           <div className="flex flex-col items-start md:items-end">
-            <h4 className="font-black text-gray-900 mb-4 text-sm uppercase tracking-[0.2em]">聯絡</h4>
+            <h4 className="font-black text-gray-900 mb-4 text-sm uppercase tracking-[0.2em]">{t.contact}</h4>
             <div className="flex flex-col items-start md:items-end gap-2">
               <a href={`mailto:${contactEmail}`} className="text-lg font-black text-purple-600 hover:text-purple-800 transition-colors">
                 {contactEmail}
@@ -29,7 +42,7 @@ export const Footer: React.FC = () => {
         </div>
         
         <div className="mt-16 pt-8 border-t border-gray-100 flex justify-between items-center">
-          <p className="text-sm text-gray-400 font-medium">Made with ❤️ in Taiwan.</p>
+          <p className="text-sm text-gray-400 font-medium">{t.madeWith}</p>
           <span className="text-sm text-gray-400 font-bold uppercase tracking-widest">v1.2 Beta</span>
         </div>
       </div>

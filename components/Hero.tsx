@@ -1,14 +1,8 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 type UserRole = 'professional' | 'student' | 'parent' | 'senior';
-
-const roleData: Record<UserRole, { label: string, icon: string }> = {
-  professional: { label: '職場玩家', icon: '⚔️' },
-  student: { label: '校園新手', icon: '🛡️' },
-  parent: { label: '家庭隊長', icon: '👑' },
-  senior: { label: '傳奇導師', icon: '🧙‍♂️' }
-};
 
 // 【已更新】Google Apps Script 網址
 const HERO_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzE_gGxX6UB_58y_6Zboa-AO_xjs9nZXcxsGrlj3x4b94QbZucsbe2LoopOVVcuwAF2eQ/exec";
@@ -23,6 +17,7 @@ const DECORATIVE_NODES = [
 ];
 
 export const Hero: React.FC = () => {
+  const { language } = useLanguage();
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<UserRole | null>(null);
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error' | 'invalid'>('idle');
@@ -31,6 +26,56 @@ export const Hero: React.FC = () => {
   const [ripples, setRipples] = useState<{ id: number, x: number, y: number }[]>([]);
   const heroRef = useRef<HTMLDivElement>(null);
   const rippleIdRef = useRef(0);
+
+  const t = {
+    'zh-TW': {
+      roles: {
+        professional: { label: '職場玩家', icon: '⚔️' },
+        student: { label: '校園新手', icon: '🛡️' },
+        parent: { label: '家庭隊長', icon: '👑' },
+        senior: { label: '傳奇導師', icon: '🧙‍♂️' }
+      },
+      // 中文：維持原本的視覺斷行
+      title: <>別只在遊戲裡當英雄，<br className="sm:hidden" /><span className="text-gradient leading-[1.3] py-1 inline-block">來現實世界解任務</span>。</>,
+      desc: <>ECHO 把枯燥的日常互助，變成一場場有意義的「副本」。<br className="hidden md:block" />發布任務給家人同事、組隊解決鄰里難題，<br className="hidden md:block" />這次掉落的不是虛擬金幣，而是讓你被真實看見的「感謝回聲」。</>,
+      chooseRole: "選擇您的初始角色職業",
+      placeholder: "輸入 Email，預約封測名額",
+      cta: "預約搶先體驗",
+      submitting: "提交中...",
+      successTitle: "預約成功！",
+      successDesc: <>您已列入 ECHO 首波冒險者候補名單。<br/>伺服器正在建設中，正式開服時將優先發送召集令給您！</>,
+      back: "使用其他 Email 預約",
+      error: "伺服器忙碌中，請稍後再試",
+      invalidRole: "請選擇您的玩家類別",
+      invalidEmail: "Email 格式似乎有誤"
+    },
+    'en-US': {
+      roles: {
+        professional: { label: 'Career Warrior', icon: '⚔️' },
+        student: { label: 'Campus Rookie', icon: '🛡️' },
+        parent: { label: 'Household Captain', icon: '👑' },
+        senior: { label: 'Grand Mentor', icon: '🧙‍♂️' }
+      },
+      // 英文：使用 block 確保句子完整性，避免標點符號孤兒
+      title: (
+        <>
+          <span className="block mb-1 md:mb-3">Don't just be a hero online.</span>
+          <span className="text-gradient leading-[1.3] py-1 inline-block">Be a Legend in Reality.</span>
+        </>
+      ),
+      desc: <>ECHO transforms mundane favors into Epic Quests. Issue challenges to colleagues, team up for neighborhood raids. The loot? Not virtual pixels, but genuine 'Echoes of Gratitude' that truly matter.</>,
+      chooseRole: "Select Your Starting Class",
+      placeholder: "Enter Email to Join the Waitlist",
+      cta: "Pre-register Now",
+      submitting: "Syncing...",
+      successTitle: "You're on the List!",
+      successDesc: <>You've secured a spot in the ECHO Vanguard.<br/>We'll summon you as soon as the servers go live!</>,
+      back: "Register another email",
+      error: "Server overloaded. Please retry.",
+      invalidRole: "Please select a character class",
+      invalidEmail: "Invalid email syntax"
+    }
+  }[language];
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!heroRef.current) return;
@@ -57,11 +102,12 @@ export const Hero: React.FC = () => {
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
-    if (!role) { setStatus('invalid'); setErrorMessage('請選擇您的玩家類別'); return; }
-    if (!validateEmail(email)) { setStatus('invalid'); setErrorMessage('Email 格式似乎有誤'); return; }
+    if (!role) { setStatus('invalid'); setErrorMessage(t.invalidRole); return; }
+    if (!validateEmail(email)) { setStatus('invalid'); setErrorMessage(t.invalidEmail); return; }
     
     setStatus('submitting');
     try {
+      const roleLabel = t.roles[role].label; // Use the localized label
       const response = await fetch(HERO_SCRIPT_URL, {
         method: "POST",
         mode: "no-cors", 
@@ -69,7 +115,8 @@ export const Hero: React.FC = () => {
         body: JSON.stringify({ 
           timestamp: new Date().toLocaleString(),
           email: email, 
-          role: roleData[role].label,
+          role: roleLabel,
+          language: language,
           source: "Landing Page Hero"
         }),
       });
@@ -78,7 +125,7 @@ export const Hero: React.FC = () => {
     } catch (error) {
       console.error("Submission error:", error);
       setStatus('error'); 
-      setErrorMessage('伺服器忙碌中，請稍後再試');
+      setErrorMessage(t.error);
     }
   };
 
@@ -102,17 +149,21 @@ export const Hero: React.FC = () => {
 
       <div className="max-w-5xl mx-auto text-center relative z-10 w-full">
         <div className="reveal-text" style={{ animationDelay: '0.1s' }}>
-          <h1 className="text-5xl sm:text-6xl md:text-8xl font-black leading-tight mb-8 text-gray-900 tracking-tight px-2 drop-shadow-sm">
-            別只在遊戲裡當英雄，<br className="sm:hidden" />
-            <span className="text-gradient">來現實世界解任務</span>。
+          {/* 
+            Typography Update:
+            - text-4xl (Mobile): 稍微縮小，避免英文長句破版
+            - sm:text-5xl (Small Tablet): 過渡平滑
+            - md:text-7xl (Desktop): 保持大氣
+            - lg:text-8xl (Large Desktop): 視覺衝擊
+          */}
+          <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black leading-snug md:leading-tight mb-8 text-gray-900 tracking-tight px-2 drop-shadow-sm py-2">
+            {t.title}
           </h1>
         </div>
         
         <div className="reveal-text" style={{ animationDelay: '0.3s' }}>
           <p className="text-lg md:text-2xl text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed font-light px-4">
-            ECHO 把枯燥的日常互助，變成一場場有意義的「副本」。<br className="hidden md:block" />
-            發布任務給家人同事、組隊解決鄰里難題，<br className="hidden md:block" />
-            這次掉落的不是虛擬金幣，而是讓你被真實看見的「感謝回聲」。
+            {t.desc}
           </p>
         </div>
         
@@ -120,10 +171,15 @@ export const Hero: React.FC = () => {
           {status !== 'success' ? (
             <div className="w-full space-y-6 md:space-y-8">
               <div className="space-y-4 w-full">
-                <p className="text-xs font-black text-gray-400 uppercase tracking-widest">選擇您的初始角色職業</p>
-                {/* 手機版 grid 佈局 */}
-                <div className="grid grid-cols-4 gap-2 w-full md:flex md:justify-center md:gap-3">
-                  {(Object.keys(roleData) as UserRole[]).map((key) => (
+                <p className="text-xs font-black text-gray-400 uppercase tracking-widest">{t.chooseRole}</p>
+                {/* 
+                   佈局優化：
+                   手機版 (default) grid-cols-2：英文文字較長，兩欄比較不擠。
+                   平板 (sm) grid-cols-4：空間夠時四欄並排。
+                   桌面 (md) flex：保持原本的彈性置中。
+                */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 w-full md:flex md:justify-center md:gap-3">
+                  {(Object.keys(t.roles) as UserRole[]).map((key) => (
                     <button
                       key={key}
                       type="button"
@@ -138,8 +194,8 @@ export const Hero: React.FC = () => {
                         }
                       `}
                     >
-                      <span className="text-xl md:text-lg leading-none">{roleData[key].icon}</span>
-                      <span className="text-[11px] md:text-sm font-bold whitespace-nowrap leading-tight">{roleData[key].label}</span>
+                      <span className="text-xl md:text-lg leading-none">{t.roles[key].icon}</span>
+                      <span className="text-[11px] md:text-sm font-bold whitespace-nowrap leading-tight">{t.roles[key].label}</span>
                     </button>
                   ))}
                 </div>
@@ -153,7 +209,7 @@ export const Hero: React.FC = () => {
                     type="email" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="輸入 Email，預約封測名額" 
+                    placeholder={t.placeholder}
                     className="flex-1 px-4 md:px-8 py-3 md:py-4 rounded-full outline-none text-gray-800 bg-transparent text-sm md:text-base font-medium min-w-0 placeholder-gray-400"
                     required 
                     disabled={status === 'submitting'}
@@ -165,7 +221,7 @@ export const Hero: React.FC = () => {
                       status === 'submitting' ? 'bg-gray-400' : 'bg-gray-900 text-white hover:bg-purple-700 active:scale-95'
                     }`}
                   >
-                    {status === 'submitting' ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span> : '預約搶先體驗'}
+                    {status === 'submitting' ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span> : t.cta}
                   </button>
                 </form>
                 {status === 'invalid' && errorMessage && <p className="absolute -bottom-8 left-6 text-red-500 text-xs font-bold animate-fade-in">{errorMessage}</p>}
@@ -175,13 +231,12 @@ export const Hero: React.FC = () => {
             <div className="bg-white/90 backdrop-blur-md p-8 md:p-14 rounded-[3rem] border border-green-100 shadow-2xl flex flex-col items-center gap-6 animate-fade-in relative w-full border-t-4 border-t-green-500">
               <div className="w-16 h-16 md:w-20 md:h-20 bg-green-500 text-white rounded-full flex items-center justify-center text-3xl md:text-4xl shadow-lg shadow-green-100 animate-bounce">⏳</div>
               <div className="space-y-3">
-                <p className="text-2xl md:text-3xl font-black text-gray-900">預約成功！</p>
+                <p className="text-2xl md:text-3xl font-black text-gray-900">{t.successTitle}</p>
                 <p className="text-base md:text-lg text-gray-600 font-medium">
-                  您已列入 ECHO 首波冒險者候補名單。<br/>
-                  伺服器正在建設中，正式開服時將優先發送召集令給您！
+                  {t.successDesc}
                 </p>
               </div>
-              <button onClick={() => setStatus('idle')} className="text-xs font-bold text-gray-400 hover:text-purple-600 transition-colors uppercase tracking-widest">使用其他 Email 預約</button>
+              <button onClick={() => setStatus('idle')} className="text-xs font-bold text-gray-400 hover:text-purple-600 transition-colors uppercase tracking-widest">{t.back}</button>
             </div>
           )}
         </div>

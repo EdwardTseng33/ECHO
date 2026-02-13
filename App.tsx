@@ -8,8 +8,9 @@ import { Audience } from './components/Audience';
 import { VoiceEchoDemo } from './components/VoiceEchoDemo';
 import { Partners } from './components/Partners';
 import { Footer } from './components/Footer';
+import { LanguageProvider } from './contexts/LanguageContext';
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -46,6 +47,14 @@ const App: React.FC = () => {
 
       <Footer />
     </div>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <LanguageProvider>
+      <AppContent />
+    </LanguageProvider>
   );
 };
 
