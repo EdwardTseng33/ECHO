@@ -93,7 +93,7 @@ export const Partners: React.FC = () => {
                         type="text" 
                         name="name_or_org"
                         required
-                        className="w-full px-5 py-3 rounded-xl border border-gray-100 bg-gray-50 focus:bg-white focus:ring-4 focus:ring-purple-500/10 focus:border-purple-300 outline-none transition-all text-base font-medium" 
+                        className="w-full px-5 py-3 rounded-xl border border-gray-100 bg-gray-50 focus:bg-white focus:ring-4 focus:ring-purple-500/10 focus:border-purple-300 outline-none transition-all text-base font-medium text-gray-900 placeholder-gray-400" 
                         placeholder="姓名或單位名稱" 
                         disabled={status === 'submitting'}
                       />
@@ -105,7 +105,7 @@ export const Partners: React.FC = () => {
                         type="email" 
                         name="email"
                         required
-                        className="w-full px-5 py-3 rounded-xl border border-gray-100 bg-gray-50 focus:bg-white focus:ring-4 focus:ring-purple-500/10 focus:border-purple-300 outline-none transition-all text-base font-medium" 
+                        className="w-full px-5 py-3 rounded-xl border border-gray-100 bg-gray-50 focus:bg-white focus:ring-4 focus:ring-purple-500/10 focus:border-purple-300 outline-none transition-all text-base font-medium text-gray-900 placeholder-gray-400" 
                         placeholder="contact@email.com" 
                         disabled={status === 'submitting'}
                       />
@@ -129,7 +129,7 @@ export const Partners: React.FC = () => {
                       <textarea 
                         name="message"
                         required
-                        className="w-full px-5 py-4 rounded-xl border border-gray-100 bg-gray-50 focus:bg-white focus:ring-4 focus:ring-purple-500/10 focus:border-purple-300 outline-none transition-all h-28 text-base font-medium resize-none" 
+                        className="w-full px-5 py-4 rounded-xl border border-gray-100 bg-gray-50 focus:bg-white focus:ring-4 focus:ring-purple-500/10 focus:border-purple-300 outline-none transition-all h-28 text-base font-medium text-gray-900 placeholder-gray-400 resize-none" 
                         placeholder="請簡述您的想法..."
                         disabled={status === 'submitting'}
                       ></textarea>

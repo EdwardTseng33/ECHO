@@ -32,7 +32,7 @@ export const VoiceEchoDemo: React.FC = () => {
             <textarea 
               rows={3}
               placeholder="例如：幫加班的同事訂晚餐、幫隔壁太太顧小孩10分鐘..." 
-              className="w-full px-6 py-5 rounded-2xl border border-purple-100 focus:ring-4 focus:ring-purple-500/10 outline-none transition-all shadow-inner bg-white/50 resize-none text-base"
+              className="w-full px-6 py-5 rounded-2xl border border-purple-100 focus:ring-4 focus:ring-purple-500/10 outline-none transition-all shadow-inner bg-white/50 resize-none text-base text-gray-900 placeholder-gray-400"
               value={task}
               onChange={(e) => setTask(e.target.value)}
             />
