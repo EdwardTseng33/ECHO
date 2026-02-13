@@ -1,11 +1,17 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
 
-// 確保在編譯時能通過型別檢查
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || "" });
+// 封裝一個獲取 AI 實例的方法，避免在模組頂層直接執行可能失敗的邏輯
+const getAI = () => {
+  const apiKey = process.env.API_KEY;
+  if (!apiKey) {
+    console.warn("API_KEY is missing in environment variables.");
+  }
+  return new GoogleGenAI({ apiKey: apiKey || "" });
+};
 
 export async function generateGratitudeEcho(taskDescription: string): Promise<{ text: string; persona: string }> {
   try {
+    const ai = getAI();
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: `身為 ECHO 互助社群的語音回聲系統，請根據使用者的這項付出：「${taskDescription}」，生成一段溫暖、真誠且具有台灣在地語感的感謝詞。
@@ -35,7 +41,9 @@ export async function generateGratitudeEcho(taskDescription: string): Promise<{ 
       throw new Error("No output from Gemini");
     }
 
-    return JSON.parse(textOutput);
+    // 確保處理 JSON 字串時的安全
+    const cleanedText = textOutput.trim();
+    return JSON.parse(cleanedText);
   } catch (e) {
     console.error("Gemini Error:", e);
     return {
