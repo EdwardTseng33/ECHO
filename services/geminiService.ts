@@ -1,7 +1,8 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// 確保在編譯時能通過型別檢查
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || "" });
 
 export async function generateGratitudeEcho(taskDescription: string): Promise<{ text: string; persona: string }> {
   try {
@@ -29,7 +30,12 @@ export async function generateGratitudeEcho(taskDescription: string): Promise<{ 
       }
     });
 
-    return JSON.parse(response.text);
+    const textOutput = response.text;
+    if (!textOutput) {
+      throw new Error("No output from Gemini");
+    }
+
+    return JSON.parse(textOutput);
   } catch (e) {
     console.error("Gemini Error:", e);
     return {
