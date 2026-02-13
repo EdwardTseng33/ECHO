@@ -11,18 +11,6 @@
         .gradient-bg {
             background: linear-gradient(135deg, #fdfbf7 0%, #f3e8ff 50%, #e0f2fe 100%);
         }
-        
-        @keyframes pulse-ring {
-            0% { transform: scale(0.8); opacity: 0; }
-            50% { opacity: 0.15; }
-            100% { transform: scale(2.5); opacity: 0; }
-        }
-        .echo-ring {
-            position: absolute;
-            border: 2px solid rgba(126, 34, 206, 0.1);
-            border-radius: 50%;
-            pointer-events: none;
-        }
 
         @keyframes float {
             0%, 100% { transform: translateY(0px) rotate(0deg); }
@@ -34,12 +22,12 @@
 
         @keyframes blob {
             0% { transform: translate(0px, 0px) scale(1); }
-            33% { transform: translate(20px, -30px) scale(1.05); }
-            66% { transform: translate(-15px, 15px) scale(0.95); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
             100% { transform: translate(0px, 0px) scale(1); }
         }
         .animate-blob {
-            animation: blob 12s infinite;
+            animation: blob 15s infinite;
         }
         .animation-delay-2000 {
             animation-delay: 3s;
@@ -85,12 +73,12 @@
 <script type="importmap">
 {
   "imports": {
+    "react": "https://esm.sh/react@^19.2.4",
     "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
-    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.4",
+    "react/": "https://esm.sh/react@^19.2.4/",
     "@google/genai": "https://esm.sh/@google/genai@^1.41.0",
     "vite": "https://esm.sh/vite@^7.3.1",
-    "react/": "https://esm.sh/react@^19.2.4/",
-    "react": "https://esm.sh/react@^19.2.4"
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.4"
   }
 }
 </script>
