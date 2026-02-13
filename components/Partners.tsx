@@ -1,9 +1,8 @@
 
 import React, { useState } from 'react';
 
-// 【注意】這是 合作提案表單 專用的 Google Apps Script 網址
-// 如果您希望資料進入不同的 Google Sheet，請在此處填入不同的 Web App URL
-const PARTNER_SCRIPT_URL = "YOUR_PARTNER_FORM_SCRIPT_URL_HERE";
+// 【已更新】Google Apps Script 網址
+const PARTNER_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzE_gGxX6UB_58y_6Zboa-AO_xjs9nZXcxsGrlj3x4b94QbZucsbe2LoopOVVcuwAF2eQ/exec";
 
 export const Partners: React.FC = () => {
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -47,13 +48,25 @@
             -webkit-text-fill-color: transparent;
         }
         
+        /* New Animations */
         .reveal-text {
-            animation: reveal 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            animation: fadeInUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateY(30px);
         }
-        @keyframes reveal {
+        
+        @keyframes fadeInUp {
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes sound-wave {
+            0% { height: 10%; }
+            50% { height: 100%; }
+            100% { height: 10%; }
+        }
+        
+        .animate-sound-wave {
+            animation: sound-wave 1s ease-in-out infinite;
         }
 
         ::-webkit-scrollbar {
@@ -85,7 +98,6 @@
 </head>
 <body class="gradient-bg min-h-screen">
     <div id="root"></div>
-    <!-- Vite 專案的入口，Vite 會自動處理 index.tsx 的編譯與依賴注入 -->
     <script type="module" src="/index.tsx"></script>
 </body>
 </html>

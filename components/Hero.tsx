@@ -4,14 +4,14 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 type UserRole = 'professional' | 'student' | 'parent' | 'senior';
 
 const roleData: Record<UserRole, { label: string, icon: string }> = {
-  professional: { label: '職場青年', icon: '🧑‍💻' },
-  student: { label: '在學學生', icon: '🎓' },
-  parent: { label: '育兒家長', icon: '👶' },
-  senior: { label: '退休人士', icon: '🍵' }
+  professional: { label: '職場玩家', icon: '⚔️' },
+  student: { label: '校園新手', icon: '🛡️' },
+  parent: { label: '家庭隊長', icon: '👑' },
+  senior: { label: '傳奇導師', icon: '🧙‍♂️' }
 };
 
-// 【注意】這是 Hero 表單專用的 Google Apps Script 網址
-const HERO_SCRIPT_URL = "YOUR_HERO_FORM_SCRIPT_URL_HERE";
+// 【已更新】Google Apps Script 網址
+const HERO_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzE_gGxX6UB_58y_6Zboa-AO_xjs9nZXcxsGrlj3x4b94QbZucsbe2LoopOVVcuwAF2eQ/exec";
 
 const DECORATIVE_NODES = [
   { top: '15%', left: '10%', size: 4, delay: '0s' },
@@ -57,15 +57,14 @@ export const Hero: React.FC = () => {
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
-    if (!role) { setStatus('invalid'); setErrorMessage('請先選擇您的身分'); return; }
-    if (!validateEmail(email)) { setStatus('invalid'); setErrorMessage('Email 格式不正確'); return; }
+    if (!role) { setStatus('invalid'); setErrorMessage('請選擇您的玩家類別'); return; }
+    if (!validateEmail(email)) { setStatus('invalid'); setErrorMessage('Email 格式似乎有誤'); return; }
     
     setStatus('submitting');
     try {
-      // 串接 Google Sheets API (透過 GAS)
       const response = await fetch(HERO_SCRIPT_URL, {
         method: "POST",
-        mode: "no-cors", // 重要：GAS 跨網域請求通常需要 no-cors 模式
+        mode: "no-cors", 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           timestamp: new Date().toLocaleString(),
@@ -75,18 +74,12 @@ export const Hero: React.FC = () => {
         }),
       });
       
-      // 在 no-cors 模式下無法讀取 response 內容，但如果沒拋出錯誤通常就是成功
       setStatus('success');
     } catch (error) {
       console.error("Submission error:", error);
       setStatus('error'); 
-      setErrorMessage('連線異常，請檢查網路或稍後再試');
+      setErrorMessage('伺服器忙碌中，請稍後再試');
     }
-  };
-
-  const scrollTo = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) element.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
@@ -110,15 +103,16 @@ export const Hero: React.FC = () => {
       <div className="max-w-5xl mx-auto text-center relative z-10 w-full">
         <div className="reveal-text" style={{ animationDelay: '0.1s' }}>
           <h1 className="text-5xl sm:text-6xl md:text-8xl font-black leading-tight mb-8 text-gray-900 tracking-tight px-2 drop-shadow-sm">
-            每一次互助，<br className="sm:hidden" />
-            <span className="text-gradient">都值得一個回聲</span>。
+            別只在遊戲裡當英雄，<br className="sm:hidden" />
+            <span className="text-gradient">來現實世界解任務</span>。
           </h1>
         </div>
         
         <div className="reveal-text" style={{ animationDelay: '0.3s' }}>
           <p className="text-lg md:text-2xl text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed font-light px-4">
-            ECHO 將日常的微小協助轉化為真實的語音感謝。<br className="hidden md:block" />
-            在數位時代，找回原本就屬於人的溫度與成就感。
+            ECHO 把枯燥的日常互助，變成一場場有意義的「副本」。<br className="hidden md:block" />
+            發布任務給家人同事、組隊解決鄰里難題，<br className="hidden md:block" />
+            這次掉落的不是虛擬金幣，而是讓你被真實看見的「感謝回聲」。
           </p>
         </div>
         
@@ -126,8 +120,8 @@ export const Hero: React.FC = () => {
           {status !== 'success' ? (
             <div className="w-full space-y-6 md:space-y-8">
               <div className="space-y-4 w-full">
-                <p className="text-xs font-black text-gray-400 uppercase tracking-widest">請先選擇您的身分，讓我們更了解您</p>
-                {/* 手機版使用 grid grid-cols-4 強制併排，桌機版維持 flex */}
+                <p className="text-xs font-black text-gray-400 uppercase tracking-widest">選擇您的初始角色職業</p>
+                {/* 手機版 grid 佈局 */}
                 <div className="grid grid-cols-4 gap-2 w-full md:flex md:justify-center md:gap-3">
                   {(Object.keys(roleData) as UserRole[]).map((key) => (
                     <button
@@ -159,8 +153,8 @@ export const Hero: React.FC = () => {
                     type="email" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="輸入您的常用 Email" 
-                    className="flex-1 px-4 md:px-8 py-3 md:py-4 rounded-full outline-none text-gray-800 bg-transparent text-sm md:text-base font-medium min-w-0"
+                    placeholder="輸入 Email，預約封測名額" 
+                    className="flex-1 px-4 md:px-8 py-3 md:py-4 rounded-full outline-none text-gray-800 bg-transparent text-sm md:text-base font-medium min-w-0 placeholder-gray-400"
                     required 
                     disabled={status === 'submitting'}
                   />
@@ -171,7 +165,7 @@ export const Hero: React.FC = () => {
                       status === 'submitting' ? 'bg-gray-400' : 'bg-gray-900 text-white hover:bg-purple-700 active:scale-95'
                     }`}
                   >
-                    {status === 'submitting' ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span> : '預約封測'}
+                    {status === 'submitting' ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span> : '預約搶先體驗'}
                   </button>
                 </form>
                 {status === 'invalid' && errorMessage && <p className="absolute -bottom-8 left-6 text-red-500 text-xs font-bold animate-fade-in">{errorMessage}</p>}
@@ -179,12 +173,15 @@ export const Hero: React.FC = () => {
             </div>
           ) : (
             <div className="bg-white/90 backdrop-blur-md p-8 md:p-14 rounded-[3rem] border border-green-100 shadow-2xl flex flex-col items-center gap-6 animate-fade-in relative w-full border-t-4 border-t-green-500">
-              <div className="w-16 h-16 md:w-20 md:h-20 bg-green-500 text-white rounded-full flex items-center justify-center text-3xl md:text-4xl shadow-lg shadow-green-100">✓</div>
+              <div className="w-16 h-16 md:w-20 md:h-20 bg-green-500 text-white rounded-full flex items-center justify-center text-3xl md:text-4xl shadow-lg shadow-green-100 animate-bounce">⏳</div>
               <div className="space-y-3">
                 <p className="text-2xl md:text-3xl font-black text-gray-900">預約成功！</p>
-                <p className="text-base md:text-lg text-gray-600 font-medium">感謝您願意讓付出擁有回音。我們將持續在 Google Sheets 更新名單。</p>
+                <p className="text-base md:text-lg text-gray-600 font-medium">
+                  您已列入 ECHO 首波冒險者候補名單。<br/>
+                  伺服器正在建設中，正式開服時將優先發送召集令給您！
+                </p>
               </div>
-              <button onClick={() => setStatus('idle')} className="text-xs font-bold text-gray-400 hover:text-purple-600 transition-colors uppercase tracking-widest">返回修改資料</button>
+              <button onClick={() => setStatus('idle')} className="text-xs font-bold text-gray-400 hover:text-purple-600 transition-colors uppercase tracking-widest">使用其他 Email 預約</button>
             </div>
           )}
         </div>
