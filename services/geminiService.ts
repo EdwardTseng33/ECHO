@@ -4,39 +4,37 @@ import { GoogleGenAI, Type } from "@google/genai";
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export async function generateGratitudeEcho(taskDescription: string): Promise<{ text: string; persona: string }> {
-  const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
-    contents: `The user just performed this act of kindness/support: "${taskDescription}". 
-    Generate a warm, heartfelt, and culturally authentic Taiwanese gratitude message (Traditional Chinese).
-    
-    The scenario could be:
-    1. Intergenerational (Elderly/Youth)
-    2. Parenting (Neighbor helping with kids/parenting advice)
-    3. Workplace (Colleagues supporting each other)
-    
-    Based on the task description, pick the most appropriate persona. 
-    The response should sound like a real person (a busy mom, a thankful co-worker, a neighbor, etc.).
-    Keep it under 60 words.`,
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          text: { type: Type.STRING, description: "The gratitude message in Traditional Chinese." },
-          persona: { type: Type.STRING, description: "A brief description of the role/persona (e.g., '雙寶媽林太太', '隔壁部門的小明', '王奶奶')." }
-        },
-        required: ["text", "persona"]
-      }
-    }
-  });
-
   try {
-    const result = JSON.parse(response.text);
-    return result;
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: `身為 ECHO 互助社群的語音回聲系統，請根據使用者的這項付出：「${taskDescription}」，生成一段溫暖、真誠且具有台灣在地語感的感謝詞。
+      
+      語境設定：
+      1. 跨世代（長輩對年輕人）：語氣慈祥、帶點台灣人特有的熱情。
+      2. 育兒支援（鄰居或家長互助）：語氣充滿感激、帶點如釋重負的感覺。
+      3. 職場同儕：口吻自然、像好夥伴之間的肯定。
+      
+      請根據任務描述選擇最合適的人格。回應需像是一個真實的人（如：林太太、隔壁的小明、王奶奶）。
+      限制：50 字以內，使用繁體中文。`,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            text: { type: Type.STRING, description: "感謝詞內容，需口語化且溫馨。" },
+            persona: { type: Type.STRING, description: "角色稱呼（如：三樓的王奶奶、研發部小傑）。" }
+          },
+          required: ["text", "persona"]
+        }
+      }
+    });
+
+    return JSON.parse(response.text);
   } catch (e) {
+    console.error("Gemini Error:", e);
     return {
-      text: "真的非常感謝你的幫忙，這對我來說很有意義。有你真好！",
-      persona: "暖心的夥伴"
+      text: "真的非常感謝你的幫忙！這對我來說意義重大，有你這個鄰居/夥伴真好。",
+      persona: "暖心的社群成員"
     };
   }
 }
